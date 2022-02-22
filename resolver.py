@@ -145,6 +145,7 @@ while True:
     send_word(word)
     count += 1
     if isWin() or count >= row_count:
-        print("WORD NOT FOUND")
+        if count >= row_count:
+            print("WORD NOT FOUND")
         time.sleep(10)
         break;
