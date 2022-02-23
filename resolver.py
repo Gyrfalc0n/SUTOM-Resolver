@@ -61,14 +61,23 @@ def random_word():
                 tested_words.append(line)
                 return line
 
-def guess_word():
+def possible_words():
+    possible = []
     lettre = grille[0][0] # Premier caractère
     for line in lines:
         line = line[:-1] # Delete last end of string character
         if line.startswith(lettre):
             if len(line) == colums_count and isUniqueChars(line) and containsAll(line) and containsSub(line) and line not in tested_words:
-                tested_words.append(line)
-                return line
+                possible.append(line)
+    return possible
+
+def guess_word():
+    possible = possible_words()
+    if len(possible) >= 1:
+        word = possible[0]
+        tested_words.append(word)
+        return word
+    return None
             
 def containsSub(word): # Check if word contains all correct letters in correct position
     local_string = "" 
@@ -129,7 +138,7 @@ def send_word(word):
     time.sleep(0.5)
     action.send_keys(Keys.RETURN).perform()
     actual_row += 1
-    time.sleep(1.5)
+    time.sleep(0.4*colums_count)
 
 # -- MAIN --
 count = 0
@@ -140,6 +149,8 @@ send_word(first_word)
 while True:
     driver.refresh()
     refresh_table()
+    possible = possible_words()
+    print("Possible words are (" + str(len(possible)) + "): " + str(possible))
     word = guess_word()
     print("Guess word is: " + str(word))
     send_word(word)
