@@ -24,7 +24,7 @@ time.sleep(1)
 driver.find_element(By.ID, "panel-fenetre-bouton-fermeture-icone").click()
 
 # Dictionnaire
-file = open('dictionnaire.txt', 'r')
+file = open('full-dictionnaire.txt', 'r')
 lines = file.readlines()
 
 # Table dimension counting
