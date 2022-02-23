@@ -1,4 +1,5 @@
 import time
+from numpy import test
 from selenium import webdriver
 from collections import Counter
 from selenium.webdriver import ActionChains
@@ -31,7 +32,8 @@ row_count = len(driver.find_elements(By.XPATH, "//*[@id=\"grille\"]/table/tr"))
 colums_count = int(len(driver.find_elements(By.XPATH, "//*[@id=\"grille\"]/table/tr/td"))/row_count)
 print(" -- Grille du jour -- \n" + "Lignes: " + str(row_count) + ", Colonnes: " + str(colums_count))
 # Table duplication
-global grille, tag, actual_row
+global grille, tag, actual_row, possible
+possible = []
 tested_words = []
 actual_row = -1
 grille = [['.' for x in range(colums_count)] for x in range(row_count)]
@@ -62,6 +64,7 @@ def random_word():
                 return line
 
 def possible_words():
+    global possible
     possible = []
     lettre = grille[0][0] # Premier caractère
     for line in lines:
@@ -69,10 +72,9 @@ def possible_words():
         if line.startswith(lettre):
             if len(line) == colums_count and isUniqueChars(line) and containsAll(line) and containsSub(line) and line not in tested_words:
                 possible.append(line)
-    return possible
 
 def guess_word():
-    possible = possible_words()
+    global tested_words
     if len(possible) >= 1:
         word = possible[0]
         tested_words.append(word)
@@ -149,14 +151,19 @@ send_word(first_word)
 while True:
     driver.refresh()
     refresh_table()
-    possible = possible_words()
+    possible_words()
     print("Possible words are (" + str(len(possible)) + "): " + str(possible))
     word = guess_word()
     print("Guess word is: " + str(word))
-    send_word(word)
-    count += 1
+    if len(possible) >= 1:
+        send_word(word)
+        count += 1
+    else:
+        print("ERROR : NO MORE WORD IN DICT TO GUESS")
+        time.sleep(10)
+        break
     if isWin() or count >= row_count:
         if count >= row_count:
-            print("WORD NOT FOUND")
+            print("WARNING : WORD NOT FOUND IN GIVEN TRY COUNT")
         time.sleep(10)
         break;
