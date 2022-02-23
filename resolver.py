@@ -155,6 +155,7 @@ def check_if_word_exist(word): # Check if last sent word is in grille, if not, t
     for k in range(len(sent_words)):
         if sent_words[k] == '':
             index = k-1 # Index of last sent word effectively / 0 if default page loading
+            print(index)
             break
     if index == 0 and actual_row == 0: # First sent word
         print("First sent word is not recognised")
