@@ -7,6 +7,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
 # Chromedriver : https://chromedriver.chromium.org/downloads
+# Format a dict : format-dict.py source-file (will be outputed as dict.txt)
+# Merge two dict : merge-dict.py file1 file2
 
 # -- VARIABLES --
 url = "https://sutom.nocle.fr/"
@@ -141,6 +143,13 @@ def send_word(word):
     action.send_keys(Keys.RETURN).perform()
     actual_row += 1
     time.sleep(0.4*colums_count)
+    
+def check_if_word_exist():
+    win = driver.find_elements(By.XPATH, "//*[@id=\"panel-fenetre-contenu\"]/p[1]")
+    if len(win) != 0:
+            return False
+    return True
+    
 
 # -- MAIN --
 count = 0
