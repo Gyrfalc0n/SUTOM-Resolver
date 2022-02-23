@@ -1,5 +1,4 @@
 import time
-from numpy import test
 from selenium import webdriver
 from collections import Counter
 from selenium.webdriver import ActionChains
@@ -34,9 +33,10 @@ row_count = len(driver.find_elements(By.XPATH, "//*[@id=\"grille\"]/table/tr"))
 colums_count = int(len(driver.find_elements(By.XPATH, "//*[@id=\"grille\"]/table/tr/td"))/row_count)
 print(" -- Grille du jour -- \n" + "Lignes: " + str(row_count) + ", Colonnes: " + str(colums_count))
 # Table duplication
-global grille, tag, actual_row, possible
+global grille, tag, actual_row, possible, unrecognised_words
 possible = []
 tested_words = []
+unrecognised_words = []
 actual_row = -1
 grille = [['.' for x in range(colums_count)] for x in range(row_count)]
 tag = [[0 for x in range(colums_count)] for x in range(row_count)] # 1: wrong placed / 2: well placed / null: default
@@ -61,7 +61,7 @@ def random_word():
     for line in lines:
         line = line[:-1]
         if line.startswith(lettre):
-            if len(line) == colums_count and isUniqueChars(line):
+            if len(line) == colums_count and isUniqueChars(line) and line not in unrecognised_words:
                 tested_words.append(line)
                 return line
 
@@ -72,7 +72,7 @@ def possible_words():
     for line in lines:
         line = line[:-1] # Delete last end of string character
         if line.startswith(lettre):
-            if len(line) == colums_count and isUniqueChars(line) and containsAll(line) and containsSub(line) and line not in tested_words:
+            if len(line) == colums_count and isUniqueChars(line) and containsAll(line) and containsSub(line) and line not in tested_words and line not in unrecognised_words:
                 possible.append(line)
 
 def guess_word():
@@ -144,19 +144,42 @@ def send_word(word):
     actual_row += 1
     time.sleep(0.4*colums_count)
     
-def check_if_word_exist():
-    win = driver.find_elements(By.XPATH, "//*[@id=\"panel-fenetre-contenu\"]/p[1]")
-    if len(win) != 0:
-            return False
-    return True
-    
+def check_if_word_exist(word): # Check if last sent word is in grille, if not, then word is not recognised
+    global actual_row, unrecognised_words
+    sent_words = []
+    for i in range(row_count):
+        last_word = ""
+        for j in range(colums_count):
+            last_word += grille[i][j]
+        sent_words.append(last_word)
+    for k in range(len(sent_words)):
+        if sent_words[k] == '':
+            index = k-1 # Index of last sent word effectively / 0 if default page loading
+            break
+    if index == 0 and actual_row == 0: # First sent word
+        print("First sent word is not recognised")
+        actual_row -= 1 # Not count last sent word, as it is not recognised
+        unrecognised_words.append(word)
+        return False
+    elif index != actual_row:
+        print('Sent word is not recognised')
+        actual_row -= 1 # Not count last sent word, as it is not recognised
+        unrecognised_words.append(word)
+        return False
+    else:
+        return True
 
 # -- MAIN --
 count = 0
-refresh_table()
-first_word = random_word()
-print("Initial guess: " + str(first_word))
-send_word(first_word)
+while True:
+    refresh_table()
+    first_word = random_word()
+    print("Initial guess: " + str(first_word))
+    send_word(first_word)
+    driver.refresh()
+    if check_if_word_exist(first_word):
+        print("First word successfull")
+        break
 while True:
     driver.refresh()
     refresh_table()
@@ -164,6 +187,7 @@ while True:
     print("Possible words are (" + str(len(possible)) + "): " + str(possible))
     word = guess_word()
     print("Guess word is: " + str(word))
+    check_if_word_exist(word)
     if len(possible) >= 1:
         send_word(word)
         count += 1
