@@ -13,9 +13,11 @@ from selenium.webdriver.common.keys import Keys
 # -- VARIABLES --
 url = "https://sutom.nocle.fr/"
 chromedriver_path = 'C:\\Program Files\\chromedriver_win32\\chromedriver.exe'
+phantomjs_path = 'phantomjs-2.1.1/bin'
 
 # -- CORE --
-driver = webdriver.Chrome(executable_path=chromedriver_path)
+driver = webdriver.PhantomJS(executable_path=phantomjs_path)
+#driver = webdriver.Chrome(executable_path=chromedriver_path)
 action = ActionChains(driver)
 driver.get(url)
 #driver.maximize_window()
