@@ -33,7 +33,8 @@ row_count = len(driver.find_elements(By.XPATH, "//*[@id=\"grille\"]/table/tr"))
 colums_count = int(len(driver.find_elements(By.XPATH, "//*[@id=\"grille\"]/table/tr/td"))/row_count)
 print(" -- Grille du jour -- \n" + "Lignes: " + str(row_count) + ", Colonnes: " + str(colums_count))
 # Table duplication
-global grille, tag, actual_row, possible, unrecognised_words
+global grille, tag, actual_row, possible, unrecognised_words, exclude_letters
+exclude_letters = []
 possible = []
 tested_words = []
 unrecognised_words = []
@@ -42,7 +43,7 @@ grille = [['.' for x in range(colums_count)] for x in range(row_count)]
 tag = [[0 for x in range(colums_count)] for x in range(row_count)] # 1: wrong placed / 2: well placed / null: default
 
 def refresh_table(): # Refresh grille & tag with attributes
-    global grille, tag, actual_row
+    global grille, tag
     table_id = driver.find_element(By.XPATH, "//*[@id=\"grille\"]/table")
     for row in range(0, row_count):
         rows = table_id.find_elements(By.XPATH, "//*[@id=\"grille\"]/table/tr[" + str(row+1) + "]")
@@ -55,6 +56,8 @@ def refresh_table(): # Refresh grille & tag with attributes
                 elif classe == "bien-place resultat":
                     tag[row][i] = 2
                 grille[row][i] = col[i].text
+    print(grille)
+    print(tag)
                     
 def random_word():
     lettre = grille[0][0] # Premier caractère
@@ -95,10 +98,10 @@ def containsSub(word): # Check if word contains all correct letters in correct p
             return False
     return True
 
-def containsAll(word): # Check if word contains all incorectly placed letters & not letters that are not in word to find
+def containsAll(word): # Check if word contains all incorectly placed letters at different position from last time & not letters that are not in word to find
     local_letters = []
     local_positions = []
-    exclude_letters = []
+    global exclude_letters
     for i in range(colums_count): # Recraft string with incorrectly placed letters {letter:position....}
         if tag[actual_row][i] == 1:
             local_letters.append(grille[actual_row][i])
@@ -115,17 +118,20 @@ def containsAll(word): # Check if word contains all incorectly placed letters & 
 
 def isUniqueChars(string): # Check if word contains unique letters (only check on the non valid letters (== exclusion of well placed )) ######## CHECK IF DOUBLE LETTERS 
     local_string = [] 
-    if actual_row != -1: # If not first execution (== word with unique letters)
-        for i in range(colums_count): # Recraft string with correct letters in position
-            if tag[actual_row][i] == 2:
-                local_string.append(grille[actual_row][i])
-                for char in local_string:
-                    string = string.replace(char,'')
-    freq = Counter(string)
-    if(len(freq) == len(string)):
+    if actual_row == -1: # First execution == all letters have to be unique to reduce possibility faster
+        freq = Counter(string)
+        if(len(freq) == len(string)):
+            return True
+        else:
+            return False
+    else: # Not first execution, letters can be double
         return True
-    else:
-        return False
+        #for i in range(colums_count): # Recraft string with correct letters in position
+        #    if tag[actual_row][i] == 2:
+        #        local_string.append(grille[actual_row][i])
+        #        for char in local_string:
+        #            string = string.replace(char,'')
+
 
 def isWin():
     win = driver.find_elements(By.XPATH, "//*[@id=\"panel-fenetre-contenu\"]/p[1]")
@@ -146,7 +152,10 @@ def send_word(word):
     
 def check_if_word_exist(word): # Check if last sent word is in grille, if not, then word is not recognised
     global actual_row, unrecognised_words
+    driver.refresh()
+    refresh_table()
     sent_words = []
+    index = 0
     for i in range(row_count):
         last_word = ""
         for j in range(colums_count):
@@ -154,15 +163,14 @@ def check_if_word_exist(word): # Check if last sent word is in grille, if not, t
         sent_words.append(last_word)
     for k in range(len(sent_words)):
         if sent_words[k] == '':
-            index = k-1 # Index of last sent word effectively / 0 if default page loading
-            print(index)
+            index = k-1 # Index of row to send next word
             break
     if index == 0 and actual_row == 0: # First sent word
         print("First sent word is not recognised")
         actual_row -= 1 # Not count last sent word, as it is not recognised
         unrecognised_words.append(word)
         return False
-    elif index != actual_row:
+    elif actual_row >= index:
         print('Sent word is not recognised')
         actual_row -= 1 # Not count last sent word, as it is not recognised
         unrecognised_words.append(word)
@@ -177,20 +185,21 @@ while True:
     first_word = random_word()
     print("Initial guess: " + str(first_word))
     send_word(first_word)
-    driver.refresh()
     if check_if_word_exist(first_word):
-        print("First word successfull")
+        print(first_word + "(First) word exists!")
         break
 while True:
     driver.refresh()
     refresh_table()
     possible_words()
-    print("Possible words are (" + str(len(possible)) + "): " + str(possible))
+    print(" - " + str(len(possible)) + " possible words")
     word = guess_word()
-    print("Guess word is: " + str(word))
-    check_if_word_exist(word)
-    if len(possible) >= 1:
+    if word != None:
+        print("Guess word is: " + str(word))
         send_word(word)
+        if check_if_word_exist(word):
+            print(word + " exists!")
+    if len(possible) >= 1:
         count += 1
     else:
         print("ERROR : NO MORE WORD IN DICT TO GUESS")
