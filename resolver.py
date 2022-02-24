@@ -1,4 +1,3 @@
-from threading import local
 import time
 from selenium import webdriver
 from collections import Counter
@@ -22,15 +21,20 @@ driver.get(url)
 #driver.maximize_window()
 driver.implicitly_wait(5)
 
+# Time
+start_time = time.time()
+
 # Click on cross to close rule panel
 time.sleep(1)
 driver.find_element(By.ID, "panel-fenetre-bouton-fermeture-icone").click()
 
 # Dictionnaire
-file = open('full-dictionnaire.txt', 'r')
+dictionnaire = 'full-dictionnaire.txt'
+unrecognised_words_txt = 'unrecognised_words.txt'
+file = open(dictionnaire, 'r')
 lines = file.readlines()
 # Unrecognised words
-unr = open('unrecognised_words.txt', 'a+')
+unr = open(unrecognised_words_txt, 'a+')
 
 # Table dimension counting
 row_count = len(driver.find_elements(By.XPATH, "//*[@id=\"grille\"]/table/tr"))
@@ -109,7 +113,7 @@ def possible_words():
                 if len(line) == colums_count and isUniqueChars(line) and containsAll(line) and containsSub(line) and line not in tested_words and line not in unrecognised_words and not is_in_unreco(line):
                     local_possible.append(line)
     if len(local_possible) == 0: # If 0 words are found, add precedent unrecognised word (maybe game has been updated with new words that were precedently unrecognised)
-        unreco = open('unrecognised_words.txt', 'r')
+        unreco = open(unrecognised_words_txt, 'r')
         unrlines = unreco.readlines()
         for line in unrlines:
             if len(line) == colums_count and isUniqueChars(line) and containsAll(line) and containsSub(line) and line not in tested_words and line not in unrecognised_words:
@@ -126,7 +130,7 @@ def guess_word():
     return None
 
 def is_in_unreco(word):
-    unreco = open('unrecognised_words.txt', 'r')
+    unreco = open(unrecognised_words_txt, 'r')
     lines = unreco.readlines()
     for line in lines:
         if word in line:
@@ -258,7 +262,10 @@ while True:
         if count >= row_count:
             print("WARNING : WORD NOT FOUND IN GIVEN TRY COUNT")
         else: # WIN
-            print("\n -- Word was " + word + " found in " + str(count+2) + " try! -- \n")
-        time.sleep(10)
+            end_time = time.time()
+            execution_time = round(end_time - start_time, 1)
+            print("\n -[ Word was " + word + " found in " + str(count+2) + " try and " + str(execution_time) + " seconds! ]- \n")
         update_unreco()
+        input("Press Enter to quit...")
+        driver.close()
         break;
