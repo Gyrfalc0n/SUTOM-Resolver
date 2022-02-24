@@ -1,3 +1,4 @@
+from threading import local
 import time
 from selenium import webdriver
 from collections import Counter
@@ -36,7 +37,8 @@ row_count = len(driver.find_elements(By.XPATH, "//*[@id=\"grille\"]/table/tr"))
 colums_count = int(len(driver.find_elements(By.XPATH, "//*[@id=\"grille\"]/table/tr/td"))/row_count)
 print(" -- Grille du jour -- \n" + "Lignes: " + str(row_count) + ", Colonnes: " + str(colums_count))
 # Table duplication
-global grille, tag, actual_row, possible, unrecognised_words
+global grille, tag, actual_row, possible, unrecognised_words, exclude_letters
+exclude_letters = []
 possible = []
 tested_words = []
 unrecognised_words = []
@@ -68,14 +70,7 @@ def random_word():
                 tested_words.append(line)
                 return line
 
-def possible_words():
-    global possible
-    possible = []
-    lettre = grille[0][0] # Premier caractère
-    for line in lines:
-        line = line[:-1] # Delete last end of string character
-        
-        # DEBUG
+ # DEBUG A METTRE DANS LA FONCTION CI APRES
         #if line == "MOT":
         #    print("line mystere")
         #    if len(line) != colums_count:
@@ -96,17 +91,32 @@ def possible_words():
         #        print("append")
         #    else:
         #        print("not append")
-        
-        if line.startswith(lettre):
-            if len(line) == colums_count and isUniqueChars(line) and containsAll(line) and containsSub(line) and line not in tested_words and line not in unrecognised_words and not is_in_unreco(line):
-                possible.append(line)
-    if len(possible) == 0: # If 0 words are found, add precedent unrecognised word (maybe game has been updated with new words that were precedently unrecognised)
+
+
+def possible_words():
+    global possible
+    local_possible = []
+    lettre = grille[0][0] # Premier caractère
+    if len(possible) == 0: # First word
+        for line in lines:
+            line = line[:-1] # Delete last end of string character
+            if line.startswith(lettre):
+                if len(line) == colums_count and isUniqueChars(line) and containsAll(line) and containsSub(line) and line not in tested_words and line not in unrecognised_words and not is_in_unreco(line):
+                    local_possible.append(line)
+    else:
+        for line in possible:
+            if line.startswith(lettre):
+                if len(line) == colums_count and isUniqueChars(line) and containsAll(line) and containsSub(line) and line not in tested_words and line not in unrecognised_words and not is_in_unreco(line):
+                    local_possible.append(line)
+    if len(local_possible) == 0: # If 0 words are found, add precedent unrecognised word (maybe game has been updated with new words that were precedently unrecognised)
         unreco = open('unrecognised_words.txt', 'r')
         unrlines = unreco.readlines()
         for line in unrlines:
             if len(line) == colums_count and isUniqueChars(line) and containsAll(line) and containsSub(line) and line not in tested_words and line not in unrecognised_words:
-                possible.append(line)
-
+                local_possible.append(line)
+    possible = local_possible # Update possible words (== reduce list)
+    
+                
 def guess_word():
     global tested_words
     if len(possible) >= 1:
@@ -138,7 +148,7 @@ def containsSub(word): # Check if word contains all correct letters in correct p
 def containsAll(word): # Check if word contains all incorectly placed letters at different position from last time & not letters that are not in word to find
     local_letters = []
     local_positions = []
-    exclude_letters = []
+    global exclude_letters
     good_letters = []
     for i in range(colums_count): # Recraft string with incorrectly placed letters {letter:position....}
         if tag[actual_row][i] == 2:
@@ -167,11 +177,6 @@ def isUniqueChars(string): # Check if word contains unique letters (only check o
             return False
     else: # Not first execution, letters can be double
         return True
-        #for i in range(colums_count): # Recraft string with correct letters in position
-        #    if tag[actual_row][i] == 2:
-        #        local_string.append(grille[actual_row][i])
-        #        for char in local_string:
-        #            string = string.replace(char,'')
 
 
 def isWin():
