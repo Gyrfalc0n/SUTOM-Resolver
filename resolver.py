@@ -8,6 +8,7 @@ from selenium.webdriver.common.keys import Keys
 # Chromedriver : https://chromedriver.chromium.org/downloads
 # Format a dict : format-dict.py source-file (will be outputed as dict.txt)
 # Merge two dict : merge-dict.py file1 file2
+# Sort dict in bash : sort dict -o dict
 
 # -- VARIABLES --
 url = "https://sutom.nocle.fr/"
@@ -17,7 +18,7 @@ chromedriver_path = 'C:\\Program Files\\chromedriver_win32\\chromedriver.exe'
 driver = webdriver.Chrome(executable_path=chromedriver_path)
 action = ActionChains(driver)
 driver.get(url)
-driver.maximize_window()
+#driver.maximize_window()
 driver.implicitly_wait(5)
 
 # Click on cross to close rule panel
@@ -27,14 +28,15 @@ driver.find_element(By.ID, "panel-fenetre-bouton-fermeture-icone").click()
 # Dictionnaire
 file = open('full-dictionnaire.txt', 'r')
 lines = file.readlines()
+# Unrecognised words
+unr = open('unrecognised_words.txt', 'a+')
 
 # Table dimension counting
 row_count = len(driver.find_elements(By.XPATH, "//*[@id=\"grille\"]/table/tr"))
 colums_count = int(len(driver.find_elements(By.XPATH, "//*[@id=\"grille\"]/table/tr/td"))/row_count)
 print(" -- Grille du jour -- \n" + "Lignes: " + str(row_count) + ", Colonnes: " + str(colums_count))
 # Table duplication
-global grille, tag, actual_row, possible, unrecognised_words, exclude_letters
-exclude_letters = []
+global grille, tag, actual_row, possible, unrecognised_words
 possible = []
 tested_words = []
 unrecognised_words = []
@@ -56,15 +58,13 @@ def refresh_table(): # Refresh grille & tag with attributes
                 elif classe == "bien-place resultat":
                     tag[row][i] = 2
                 grille[row][i] = col[i].text
-    print(grille)
-    print(tag)
                     
 def random_word():
     lettre = grille[0][0] # Premier caractère
     for line in lines:
         line = line[:-1]
         if line.startswith(lettre):
-            if len(line) == colums_count and isUniqueChars(line) and line not in unrecognised_words:
+            if len(line) == colums_count and isUniqueChars(line) and line not in unrecognised_words and not is_in_unreco(line):
                 tested_words.append(line)
                 return line
 
@@ -74,7 +74,36 @@ def possible_words():
     lettre = grille[0][0] # Premier caractère
     for line in lines:
         line = line[:-1] # Delete last end of string character
+        
+        # DEBUG
+        #if line == "MOT":
+        #    print("line mystere")
+        #    if len(line) != colums_count:
+        #        print("len line")
+        #    elif not line.startswith(lettre):
+        #        print("not start letter")
+        #    elif not isUniqueChars(line):
+        #        print("Not is unique")
+        #    elif not containsAll(line):
+        #        print("Not contains all")
+        #    elif not containsSub(line):
+        #        print("Not contains sub")
+        #    elif line in tested_words:
+        #        print("In tested words")
+        #    elif line in unrecognised_words:
+        #        print("line in unreco")
+        #    if len(line) == colums_count and isUniqueChars(line) and containsAll(line) and containsSub(line) and line not in tested_words and line not in unrecognised_words:
+        #        print("append")
+        #    else:
+        #        print("not append")
+        
         if line.startswith(lettre):
+            if len(line) == colums_count and isUniqueChars(line) and containsAll(line) and containsSub(line) and line not in tested_words and line not in unrecognised_words and not is_in_unreco(line):
+                possible.append(line)
+    if len(possible) == 0: # If 0 words are found, add precedent unrecognised word (maybe game has been updated with new words that were precedently unrecognised)
+        unreco = open('unrecognised_words.txt', 'r')
+        unrlines = unreco.readlines()
+        for line in unrlines:
             if len(line) == colums_count and isUniqueChars(line) and containsAll(line) and containsSub(line) and line not in tested_words and line not in unrecognised_words:
                 possible.append(line)
 
@@ -85,6 +114,14 @@ def guess_word():
         tested_words.append(word)
         return word
     return None
+
+def is_in_unreco(word):
+    unreco = open('unrecognised_words.txt', 'r')
+    lines = unreco.readlines()
+    for line in lines:
+        if word in line:
+            return True
+    return False
             
 def containsSub(word): # Check if word contains all correct letters in correct position
     local_string = "" 
@@ -101,13 +138,17 @@ def containsSub(word): # Check if word contains all correct letters in correct p
 def containsAll(word): # Check if word contains all incorectly placed letters at different position from last time & not letters that are not in word to find
     local_letters = []
     local_positions = []
-    global exclude_letters
+    exclude_letters = []
+    good_letters = []
     for i in range(colums_count): # Recraft string with incorrectly placed letters {letter:position....}
+        if tag[actual_row][i] == 2:
+            good_letters.append(grille[actual_row][i])
         if tag[actual_row][i] == 1:
             local_letters.append(grille[actual_row][i])
             local_positions.append(i)
         if tag[actual_row][i] == 0:
-            exclude_letters.append(grille[actual_row][i])
+            if grille[actual_row][i] not in exclude_letters and grille[actual_row][i] not in good_letters:
+                exclude_letters.append(grille[actual_row][i])
     for j in range(len(local_letters)):
         if word.find(local_letters[j]) == -1 or word.find(local_letters[j]) == local_positions[j]: # If not found or in same position
             return False
@@ -117,7 +158,7 @@ def containsAll(word): # Check if word contains all incorectly placed letters at
     return True
 
 def isUniqueChars(string): # Check if word contains unique letters (only check on the non valid letters (== exclusion of well placed )) ######## CHECK IF DOUBLE LETTERS 
-    local_string = [] 
+    #local_string = [] 
     if actual_row == -1: # First execution == all letters have to be unique to reduce possibility faster
         freq = Counter(string)
         if(len(freq) == len(string)):
@@ -138,7 +179,6 @@ def isWin():
     if len(win) != 0:
         classe = win[0].get_attribute("class")
         if classe == "fin-de-partie-panel-phrase":
-            print("END GAME")
             return True
     return False
     
@@ -149,7 +189,11 @@ def send_word(word):
     action.send_keys(Keys.RETURN).perform()
     actual_row += 1
     time.sleep(0.4*colums_count)
-    
+
+def update_unreco():
+    for i in range(len(unrecognised_words)):
+        unr.writelines(unrecognised_words[i]+"\n")
+
 def check_if_word_exist(word): # Check if last sent word is in grille, if not, then word is not recognised
     global actual_row, unrecognised_words
     driver.refresh()
@@ -166,12 +210,12 @@ def check_if_word_exist(word): # Check if last sent word is in grille, if not, t
             index = k-1 # Index of row to send next word
             break
     if index == 0 and actual_row == 0: # First sent word
-        print("First sent word is not recognised")
+        print(word + " is unknown to the game")
         actual_row -= 1 # Not count last sent word, as it is not recognised
         unrecognised_words.append(word)
         return False
     elif actual_row >= index:
-        print('Sent word is not recognised')
+        print(word + " is unknown to the game")
         actual_row -= 1 # Not count last sent word, as it is not recognised
         unrecognised_words.append(word)
         return False
@@ -183,10 +227,9 @@ count = 0
 while True:
     refresh_table()
     first_word = random_word()
-    print("Initial guess: " + str(first_word))
+    print("Guess(1): " + str(first_word))
     send_word(first_word)
     if check_if_word_exist(first_word):
-        print(first_word + "(First) word exists!")
         break
 while True:
     driver.refresh()
@@ -195,18 +238,22 @@ while True:
     print(" - " + str(len(possible)) + " possible words")
     word = guess_word()
     if word != None:
-        print("Guess word is: " + str(word))
+        print("Guess(" + str(count+2) + "): " + str(word))
         send_word(word)
-        if check_if_word_exist(word):
-            print(word + " exists!")
-    if len(possible) >= 1:
-        count += 1
+        if not isWin():
+            if check_if_word_exist(word):
+                if len(possible) >= 1:
+                    count += 1
     else:
         print("ERROR : NO MORE WORD IN DICT TO GUESS")
         time.sleep(10)
+        update_unreco()
         break
     if isWin() or count >= row_count:
         if count >= row_count:
             print("WARNING : WORD NOT FOUND IN GIVEN TRY COUNT")
+        else: # WIN
+            print("\n -- Word was " + word + " found in " + str(count+2) + " try! -- \n")
         time.sleep(10)
+        update_unreco()
         break;
