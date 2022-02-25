@@ -6,15 +6,13 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
 # Chromedriver : https://chromedriver.chromium.org/downloads
-
 # Merge two dict : merge-dict.py file1 file2 (output.txt)
 # Sort dict in bash : sort dict -o dict
 # Remove empty lines on file : sed -i '/^$/d' file.txt
 # Supprimer doublons : sort file | uniq -d > file
-
 # Enrichir les mots (FR) : https://www.dcode.fr/recherche-mot
 
-# DEBUG
+# -- DEBUG --
 debug_time = False
 
 # -- VARIABLES --
@@ -88,29 +86,6 @@ def random_word():
                 tested_words.append(line)
                 return line
 
- # DEBUG A METTRE DANS LA FONCTION CI APRES
-        #if line == "MOT":
-        #    print("line mystere")
-        #    if len(line) != colums_count:
-        #        print("len line")
-        #    elif not line.startswith(lettre):
-        #        print("not start letter")
-        #    elif not isUniqueChars(line):
-        #        print("Not is unique")
-        #    elif not containsAll(line):
-        #        print("Not contains all")
-        #    elif not containsSub(line):
-        #        print("Not contains sub")
-        #    elif line in tested_words:
-        #        print("In tested words")
-        #    elif line in unrecognised_words:
-        #        print("line in unreco")
-        #    if len(line) == colums_count and isUniqueChars(line) and containsAll(line) and containsSub(line) and line not in tested_words and line not in unrecognised_words:
-        #        print("append")
-        #    else:
-        #        print("not append")
-
-
 def possible_words():
     global possible
     local_possible = []
@@ -135,7 +110,6 @@ def possible_words():
                 local_possible.append(line)
     possible = local_possible # Update possible words (== reduce list)
     timer("possible_words()")
-    
                 
 def guess_word():
     global tested_words
@@ -197,7 +171,6 @@ def isUniqueChars(string): # Check if word contains unique letters (only check o
             return False
     else: # Not first execution, letters can be double
         return True
-
 
 def isWin():
     win = driver.find_elements(By.XPATH, "//*[@id=\"panel-fenetre-contenu\"]/p[1]")
