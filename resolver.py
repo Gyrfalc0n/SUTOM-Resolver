@@ -14,6 +14,9 @@ from selenium.webdriver.common.keys import Keys
 
 # Enrichir les mots (FR) : https://www.dcode.fr/recherche-mot
 
+# DEBUG
+debug_time = True
+
 # -- VARIABLES --
 url = "https://sutom.nocle.fr/"
 chromedriver_path = 'C:\\Program Files\\chromedriver_win32\\chromedriver.exe'
@@ -27,6 +30,8 @@ driver.implicitly_wait(5)
 
 # Time
 start_time = time.time()
+global timerr
+timerr = time.time()
 
 # Click on cross to close rule panel
 time.sleep(1)
@@ -51,23 +56,28 @@ possible = []
 tested_words = []
 unrecognised_words = []
 actual_row = -1
-grille = [['.' for x in range(colums_count)] for x in range(row_count)]
+grille = [['' for x in range(colums_count)] for x in range(row_count)]
 tag = [[0 for x in range(colums_count)] for x in range(row_count)] # 1: wrong placed / 2: well placed / null: default
 
 def refresh_table(): # Refresh grille & tag with attributes
     global grille, tag
     table_id = driver.find_element(By.XPATH, "//*[@id=\"grille\"]/table")
     for row in range(0, row_count):
-        rows = table_id.find_elements(By.XPATH, "//*[@id=\"grille\"]/table/tr[" + str(row+1) + "]")
-        for row_data in rows:
-            col = row_data.find_elements(By.TAG_NAME, "td")
-            for i in range(len(col)):
-                classe = col[i].get_attribute("class")
-                if classe == "mal-place resultat":
-                    tag[row][i] = 1
-                elif classe == "bien-place resultat":
-                    tag[row][i] = 2
-                grille[row][i] = col[i].text
+        premier_word = row == 0 and actual_row == -1 # conditions for first word
+        before_row_to_send = row == actual_row and actual_row != -1 # not first word, last sent word
+        row_to_send = row == actual_row+1 and actual_row != -1 # not first word, row to send word
+        if premier_word or before_row_to_send or row_to_send: # Only check current row = faster
+            rows = table_id.find_elements(By.XPATH, "//*[@id=\"grille\"]/table/tr[" + str(row+1) + "]")
+            for row_data in rows:
+                col = row_data.find_elements(By.TAG_NAME, "td")
+                for i in range(len(col)):
+                    classe = col[i].get_attribute("class")
+                    if classe == "mal-place resultat":
+                        tag[row][i] = 1
+                    elif classe == "bien-place resultat":
+                        tag[row][i] = 2
+                    grille[row][i] = col[i].text
+    timer("refresh_table()")
                     
 def random_word():
     lettre = grille[0][0] # Premier caractère
@@ -112,9 +122,10 @@ def possible_words():
                 if len(line) == colums_count and isUniqueChars(line) and containsAll(line) and containsSub(line) and line not in tested_words and line not in unrecognised_words and not is_in_unreco(line):
                     local_possible.append(line)
     else:
-        for line in possible:
+        for k in range(0, len(possible)):
+            line = possible[k]
             if line.startswith(lettre):
-                if len(line) == colums_count and isUniqueChars(line) and containsAll(line) and containsSub(line) and line not in tested_words and line not in unrecognised_words and not is_in_unreco(line):
+                if isUniqueChars(line) and containsAll(line) and containsSub(line):
                     local_possible.append(line)
     if len(local_possible) == 0: # If 0 words are found, add precedent unrecognised word (maybe game has been updated with new words that were precedently unrecognised)
         unreco = open(unrecognised_words_txt, 'r')
@@ -123,6 +134,7 @@ def possible_words():
             if len(line) == colums_count and isUniqueChars(line) and containsAll(line) and containsSub(line) and line not in tested_words and line not in unrecognised_words:
                 local_possible.append(line)
     possible = local_possible # Update possible words (== reduce list)
+    timer("possible_words()")
     
                 
 def guess_word():
@@ -202,6 +214,7 @@ def send_word(word):
     action.send_keys(Keys.RETURN).perform()
     actual_row += 1
     time.sleep(0.4*colums_count)
+    timer("send_word()")
 
 def update_unreco():
     for i in range(len(unrecognised_words)):
@@ -209,8 +222,6 @@ def update_unreco():
 
 def check_if_word_exist(word): # Check if last sent word is in grille, if not, then word is not recognised
     global actual_row, unrecognised_words
-    driver.refresh()
-    refresh_table()
     sent_words = []
     index = 0
     for i in range(row_count):
@@ -221,19 +232,33 @@ def check_if_word_exist(word): # Check if last sent word is in grille, if not, t
     for k in range(len(sent_words)):
         if sent_words[k] == '':
             index = k-1 # Index of row to send next word
+            if word == "ECAMET":
+                print("index: " + str(index))
             break
     if index == 0 and actual_row == 0: # First sent word
         print(word + " is unknown to the game")
         actual_row -= 1 # Not count last sent word, as it is not recognised
         unrecognised_words.append(word)
+        possible.pop(word)
+        timer("check_if_word_exist()")
         return False
     elif actual_row >= index:
         print(word + " is unknown to the game")
         actual_row -= 1 # Not count last sent word, as it is not recognised
         unrecognised_words.append(word)
+        possible.remove(word)
+        timer("check_if_word_exist()")
         return False
     else:
+        timer("check_if_word_exist()")
         return True
+
+def timer(string):
+    if debug_time:
+        global timerr
+        local = time.time()
+        print("\t" + string + " time = " + str(round(local - timerr,2)))
+        timerr = local
 
 # -- MAIN --
 count = 0
@@ -242,6 +267,8 @@ while True:
     first_word = random_word()
     print("Guess(1): " + str(first_word))
     send_word(first_word)
+    driver.refresh()
+    refresh_table()
     if check_if_word_exist(first_word):
         break
 while True:
@@ -254,6 +281,8 @@ while True:
         print("Guess(" + str(count+2) + "): " + str(word))
         send_word(word)
         if not isWin():
+            driver.refresh()
+            refresh_table()
             if check_if_word_exist(word):
                 if len(possible) >= 1:
                     count += 1
