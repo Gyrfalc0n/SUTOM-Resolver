@@ -6,9 +6,13 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
 # Chromedriver : https://chromedriver.chromium.org/downloads
-# Format a dict : format-dict.py source-file (will be outputed as dict.txt)
-# Merge two dict : merge-dict.py file1 file2
+
+# Merge two dict : merge-dict.py file1 file2 (output.txt)
 # Sort dict in bash : sort dict -o dict
+# Remove empty lines on file : sed -i '/^$/d' file.txt
+# Supprimer doublons : sort file | uniq -d > file
+
+# Enrichir les mots (FR) : https://www.dcode.fr/recherche-mot
 
 # -- VARIABLES --
 url = "https://sutom.nocle.fr/"

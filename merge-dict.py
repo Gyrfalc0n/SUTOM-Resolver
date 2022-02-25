@@ -14,5 +14,5 @@ with open(dest_file) as fp:
 
 data += data2
   
-with open ('full-dictionnaire.txt', 'w') as fp:
+with open ('output.txt', 'w') as fp:
     fp.write(data)
