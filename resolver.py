@@ -271,5 +271,6 @@ while True:
             print("\n -[ Word was " + word + " found in " + str(count+2) + " try and " + str(execution_time) + " seconds! ]- \n")
         update_unreco()
         input("Press Enter to quit...")
+        time.sleep(1)
         driver.close()
         break;
