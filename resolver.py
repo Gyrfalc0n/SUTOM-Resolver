@@ -62,7 +62,7 @@ tag = [[0 for x in range(colums_count)] for x in range(row_count)] # 1: wrong pl
 def refresh_table(): # Refresh grille & tag with attributes
     global grille, tag
     table_id = driver.find_element(By.XPATH, "//*[@id=\"grille\"]/table")
-    for row in range(0, row_count):
+    for row in range(0, row_count): # 3 folowing lines are used to not scan for useless elements
         premier_word = row == 0 and actual_row == -1 # conditions for first word
         before_row_to_send = row == actual_row and actual_row != -1 # not first word, last sent word
         row_to_send = row == actual_row+1 and actual_row != -1 # not first word, row to send word
