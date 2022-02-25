@@ -15,7 +15,7 @@ from selenium.webdriver.common.keys import Keys
 # Enrichir les mots (FR) : https://www.dcode.fr/recherche-mot
 
 # DEBUG
-debug_time = True
+debug_time = False
 
 # -- VARIABLES --
 url = "https://sutom.nocle.fr/"
