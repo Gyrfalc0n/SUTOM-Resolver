@@ -17,11 +17,11 @@ debug_time = False
 
 # -- VARIABLES --
 url = "https://sutom.nocle.fr/"
-chromedriver_path = 'C:\\Program Files\\chromedriver_win32\\chromedriver.exe'
-#geckodriver_path = 'C:\Program Files\geckodriver-v0.30.0-win64\geckodriver.exe'
+#chromedriver_path = 'C:\\Program Files\\chromedriver_win32\\chromedriver.exe'
+geckodriver_path = 'C:\Program Files\geckodriver-v0.30.0\geckodriver.exe'
 # -- CORE --
-driver = webdriver.Chrome(executable_path=chromedriver_path)
-#driver = webdriver.Firefox(executable_path=geckodriver_path)
+#driver = webdriver.Chrome(executable_path=chromedriver_path)
+driver = webdriver.Firefox(executable_path=geckodriver_path)
 action = ActionChains(driver)
 driver.get(url)
 #driver.maximize_window()
@@ -213,7 +213,6 @@ def check_if_word_exist(word): # Check if last sent word is in grille, if not, t
         print(word + " is unknown to the game")
         actual_row -= 1 # Not count last sent word, as it is not recognised
         unrecognised_words.append(word)
-        possible.pop(word)
         timer("check_if_word_exist()")
         return False
     elif actual_row >= index:
