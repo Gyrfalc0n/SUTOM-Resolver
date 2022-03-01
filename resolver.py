@@ -20,8 +20,8 @@ url = "https://sutom.nocle.fr/"
 chromedriver_path = 'C:\\Program Files\\chromedriver_win32\\chromedriver.exe'
 geckodriver_path = 'C:\Program Files\geckodriver-v0.30.0\geckodriver.exe'
 # -- CORE --
-driver = webdriver.Chrome(executable_path=chromedriver_path)
-#driver = webdriver.Firefox(executable_path=geckodriver_path)
+#driver = webdriver.Chrome(executable_path=chromedriver_path)
+driver = webdriver.Firefox(executable_path=geckodriver_path)
 action = ActionChains(driver)
 driver.get(url)
 #driver.maximize_window()
@@ -240,12 +240,10 @@ while True:
     first_word = random_word()
     print("Guess(1): " + str(first_word))
     send_word(first_word)
-    driver.refresh()
     refresh_table()
     if check_if_word_exist(first_word):
         break
 while True:
-    driver.refresh()
     refresh_table()
     possible_words()
     print(" - " + str(len(possible)) + " possible words")
@@ -254,7 +252,6 @@ while True:
         print("Guess(" + str(count+2) + "): " + str(word))
         send_word(word)
         if not isWin():
-            driver.refresh()
             refresh_table()
             if check_if_word_exist(word):
                 if len(possible) >= 1:
