@@ -17,11 +17,11 @@ debug_time = False
 
 # -- VARIABLES --
 url = "https://sutom.nocle.fr/"
-#chromedriver_path = 'C:\\Program Files\\chromedriver_win32\\chromedriver.exe'
+chromedriver_path = 'C:\\Program Files\\chromedriver_win32\\chromedriver.exe'
 geckodriver_path = 'C:\Program Files\geckodriver-v0.30.0\geckodriver.exe'
 # -- CORE --
-#driver = webdriver.Chrome(executable_path=chromedriver_path)
-driver = webdriver.Firefox(executable_path=geckodriver_path)
+driver = webdriver.Chrome(executable_path=chromedriver_path)
+#driver = webdriver.Firefox(executable_path=geckodriver_path)
 action = ActionChains(driver)
 driver.get(url)
 #driver.maximize_window()
