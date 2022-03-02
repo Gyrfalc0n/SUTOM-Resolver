@@ -11,7 +11,7 @@ Le code source du jeu est disponible [ici](https://framagit.org/JonathanMM/sutom
 
 ## Démonstration
 
-![Video](demo/1.mp4)
+https://user-images.githubusercontent.com/46728024/156398865-45565a2f-dd76-45d8-b897-d2cb91e25da5.mp4
 
 ## Fonctionnement
 
