@@ -1,9 +1,17 @@
 # SUTOM-Resolver
 
+<p align="center">
+  <img src="images/titre.png">
+</p>
+
 ## Description
 
 SUTOM-Resolver est un script Python pour automatiser la recherche de solution au jeu en ligne SUTOM disponible à l'adresse suivante : https://sutom.nocle.fr
 Le code source du jeu est disponible [ici](https://framagit.org/JonathanMM/sutom).
+
+## Démonstration
+
+![Video](demo/1.mp4)
 
 ## Fonctionnement
 
@@ -14,7 +22,7 @@ Le script envoie un premier mot commençant par la lettre donnée par le jeu, et
 Le script teste le jeu à partir des mots du dictionnaire. Le dictionnaire étant plus exhaustif que celui du jeu, certains mots ne sont pas reconnus par le jeu. Pour pallier ce problème, je script ajoute à un autre fichier dictionnaire les mots non reconnus par le jeu. Le script ne les testera que s'il n'a pas trouvé de mots disponibles parmi le dictionnaire initial. Ainsi on réduit le temps de recherche, sans pour autant se priver des mots qui pourraient éventuellement être rajoutés dans le jeu.
 A la fin de l'execution, le script effectue une capture d'écran de la fenêtre du navigateur qu'il a ouvert, sous le nom `screenshot.png`. Il envoie également dans la sortie standard terminal des informations sur l'execution courante.
 
-## Techniquement
+## Installation
 
 Le script Python utilise `selenium` pour le *scraping* et l'intéraction avec la page web. Il faut donc l'installer de la manière suivante : 
 
@@ -25,9 +33,21 @@ pip install selenium
 Enfin, il utilise au choix les drivers Chrome ou Firefox pour afficher la page web et la contrôler. On peut ainsi voir le script en action sur la page.
 Pour activer le driver Chrome, il convient de commenter la ligne Firefox et de décommenter celle avec le driver Chrome.
 
-## Démonstration
+## Execution
 
-![Video](demo/1.mp4)
+```bash
+python3 resolver.py
+```
+
+## Le JEU
+
+### Règles
+
+![Règles](images/regles.png)
+
+### La grille de jeu
+
+![Grille](images/grille.png)
 
 ## Autre script
 
