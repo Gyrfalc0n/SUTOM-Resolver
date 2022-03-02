@@ -272,7 +272,7 @@ while True:
             execution_time = round(end_time - start_time, 1)
             print("\n -[ Word was " + word + " found in " + str(count+2) + " try and " + str(execution_time) + " seconds! ]- \n")
         update_unreco()
-        driver.save_screenshot("screenshot.png")
+        driver.save_screenshot("images/screenshot.png")
         input("Press Enter to quit...")
         time.sleep(1)
         driver.close()
