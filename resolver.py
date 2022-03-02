@@ -1,11 +1,10 @@
-import time, os
+import time
 from selenium import webdriver
 from collections import Counter
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
-# Chromedriver : https://chromedriver.chromium.org/downloads
 # Merge two dict : merge-dict.py file1 file2 (output.txt)
 # Sort dict in bash : sort dict -o dict
 # Remove empty lines on file : sed -i '/^$/d' file.txt
@@ -17,8 +16,8 @@ debug_time = False
 
 # -- VARIABLES --
 url = "https://sutom.nocle.fr/"
-chromedriver_path = 'C:\\Program Files\\chromedriver_win32\\chromedriver.exe'
-geckodriver_path = 'C:\Program Files\geckodriver-v0.30.0\geckodriver.exe'
+chromedriver_path = 'driver/chromedriver.exe'
+geckodriver_path = 'driver/geckodriver.exe'
 # -- CORE --
 #driver = webdriver.Chrome(executable_path=chromedriver_path)
 driver = webdriver.Firefox(executable_path=geckodriver_path)
@@ -37,8 +36,8 @@ time.sleep(1)
 driver.find_element(By.ID, "panel-fenetre-bouton-fermeture-icone").click()
 
 # Dictionnaire
-dictionnaire = 'full-dictionnaire.txt'
-unrecognised_words_txt = 'unrecognised_words.txt'
+dictionnaire = 'dict/full-dictionnaire.txt'
+unrecognised_words_txt = 'dict/unrecognised_words.txt'
 file = open(dictionnaire, 'r')
 lines = file.readlines()
 # Unrecognised words
