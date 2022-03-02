@@ -1,7 +1,7 @@
 # SUTOM-Resolver
 
 <p align="center">
-  <img src="images/titre.png">
+  <img src="https://user-images.githubusercontent.com/46728024/156399063-d08efd64-d631-4153-9899-0fe9f5f3f9b1.png">
 </p>
 
 ## Description
@@ -43,11 +43,12 @@ python3 resolver.py
 
 ### Règles
 
-![Règles](images/regles.png)
+![regles](https://user-images.githubusercontent.com/46728024/156399043-dad9f73c-17df-464a-9b0e-60ac7a4635ae.png)
 
 ### La grille de jeu
 
-![Grille](images/grille.png)
+![grille](https://user-images.githubusercontent.com/46728024/156399027-d10001c6-96e4-4b71-9ee8-ef3f4dac902c.png)
+
 
 ## Autre script
 
