@@ -47,7 +47,9 @@ python3 resolver.py
 
 ### La grille de jeu
 
-![grille](https://user-images.githubusercontent.com/46728024/156399027-d10001c6-96e4-4b71-9ee8-ef3f4dac902c.png)
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/46728024/156399027-d10001c6-96e4-4b71-9ee8-ef3f4dac902c.png">
+</p>
 
 
 ## Autre script
