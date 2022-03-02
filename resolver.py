@@ -258,8 +258,12 @@ while True:
                     count += 1
     else:
         print("ERROR : NO MORE WORD IN DICT TO GUESS")
-        time.sleep(10)
+        time.sleep(1)
         update_unreco()
+        driver.save_screenshot("screenshot.png")
+        input("Press Enter to quit...")
+        time.sleep(1)
+        driver.close()
         break
     if isWin() or count >= row_count:
         if count >= row_count:
@@ -269,6 +273,7 @@ while True:
             execution_time = round(end_time - start_time, 1)
             print("\n -[ Word was " + word + " found in " + str(count+2) + " try and " + str(execution_time) + " seconds! ]- \n")
         update_unreco()
+        driver.save_screenshot("screenshot.png")
         input("Press Enter to quit...")
         time.sleep(1)
         driver.close()
