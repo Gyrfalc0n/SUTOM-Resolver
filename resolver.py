@@ -162,10 +162,6 @@ def containsAll(word): # Check if word contains all incorectly placed letters at
             return False
     for k in range(len(exclude_letters)): # Exclude letters not in word to find
         if exclude_letters[k] in word:
-            if word == "TUNNEL":
-                print("exclude letter in word")
-                print(exclude_letters)
-                print(good_letters)
             return False
     return True
 
