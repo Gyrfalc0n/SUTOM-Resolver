@@ -100,7 +100,7 @@ def possible_words():
         for k in range(0, len(possible)):
             line = possible[k]
             if line.startswith(lettre):
-                if isUniqueChars(line) and containsAll(line) and containsSub(line):
+                if containsAll(line) and containsSub(line):
                     local_possible.append(line)
     if len(local_possible) == 0: # If 0 words are found, add precedent unrecognised word (maybe game has been updated with new words that were precedently unrecognised)
         unreco = open(unrecognised_words_txt, 'r')
@@ -151,13 +151,21 @@ def containsAll(word): # Check if word contains all incorectly placed letters at
             local_letters.append(grille[actual_row][i])
             local_positions.append(i)
         if tag[actual_row][i] == 0:
-            if grille[actual_row][i] not in exclude_letters and grille[actual_row][i] not in good_letters:
-                exclude_letters.append(grille[actual_row][i])
+            letter = grille[actual_row][i]
+            if letter not in exclude_letters and letter not in good_letters:
+                exclude_letters.append(letter)
+    for letter in exclude_letters: # Remove good letter from exclude letter if this letter has been put in exclude before knowing same letter was good too
+        if letter in good_letters:
+            exclude_letters.remove(letter)
     for j in range(len(local_letters)):
         if word.find(local_letters[j]) == -1 or word.find(local_letters[j]) == local_positions[j]: # If not found or in same position
             return False
     for k in range(len(exclude_letters)): # Exclude letters not in word to find
         if exclude_letters[k] in word:
+            if word == "TUNNEL":
+                print("exclude letter in word")
+                print(exclude_letters)
+                print(good_letters)
             return False
     return True
 
@@ -213,6 +221,7 @@ def check_if_word_exist(word): # Check if last sent word is in grille, if not, t
         actual_row -= 1 # Not count last sent word, as it is not recognised
         unrecognised_words.append(word)
         timer("check_if_word_exist()")
+        driver.refresh()
         return False
     elif actual_row >= index:
         print(word + " is unknown to the game")
@@ -220,6 +229,7 @@ def check_if_word_exist(word): # Check if last sent word is in grille, if not, t
         unrecognised_words.append(word)
         possible.remove(word)
         timer("check_if_word_exist()")
+        driver.refresh()
         return False
     else:
         timer("check_if_word_exist()")
