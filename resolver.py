@@ -1,3 +1,4 @@
+from distutils.log import debug
 import time
 from selenium import webdriver
 from collections import Counter
@@ -13,6 +14,7 @@ from selenium.webdriver.common.keys import Keys
 
 # -- DEBUG --
 debug_time = False
+word_to_check = ""
 
 # -- VARIABLES --
 url = "https://sutom.nocle.fr/"
@@ -99,6 +101,17 @@ def possible_words():
     else:
         for k in range(0, len(possible)):
             line = possible[k]
+            if debug_time and line == word_to_check:
+                if not containsAll(line):
+                    print("Contains all")
+                if not isUniqueChars(line):
+                    print("Not unique")
+                if not containsSub(line):
+                    print("Not contains sub")
+                if line in tested_words:
+                    print("Word in tested")
+                if line in unrecognised_words:
+                    print("Word in unreco")
             if line.startswith(lettre):
                 if containsAll(line) and containsSub(line):
                     local_possible.append(line)
@@ -147,6 +160,8 @@ def containsAll(word): # Check if word contains all incorectly placed letters at
     for i in range(colums_count): # Recraft string with incorrectly placed letters {letter:position....}
         if tag[actual_row][i] == 2:
             good_letters.append(grille[actual_row][i])
+            if grille[actual_row][i] in exclude_letters:
+                exclude_letters.remove(grille[actual_row][i])
         if tag[actual_row][i] == 1:
             local_letters.append(grille[actual_row][i])
             local_positions.append(i)
@@ -159,9 +174,14 @@ def containsAll(word): # Check if word contains all incorectly placed letters at
             exclude_letters.remove(letter)
     for j in range(len(local_letters)):
         if word.find(local_letters[j]) == -1 or word.find(local_letters[j]) == local_positions[j]: # If not found or in same position
+            if debug_time and word == word_to_check:
+                print("Word not found or letter in same pos")
             return False
     for k in range(len(exclude_letters)): # Exclude letters not in word to find
         if exclude_letters[k] in word:
+            if debug_time and word == word_to_check:
+                print("Exclude letter in word")
+                print(exclude_letters)
             return False
     return True
 
@@ -209,8 +229,6 @@ def check_if_word_exist(word): # Check if last sent word is in grille, if not, t
     for k in range(len(sent_words)):
         if sent_words[k] == '':
             index = k-1 # Index of row to send next word
-            if word == "ECAMET":
-                print("index: " + str(index))
             break
     if index == 0 and actual_row == 0: # First sent word
         print(word + " is unknown to the game")
