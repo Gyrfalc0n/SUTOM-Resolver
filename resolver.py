@@ -1,4 +1,3 @@
-from distutils.log import debug
 import time
 from selenium import webdriver
 from collections import Counter
