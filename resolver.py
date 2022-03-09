@@ -4,12 +4,16 @@ from collections import Counter
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.chrome.options import Options
 
 # Merge two dict : merge-dict.py file1 file2 (output.txt)
 # Sort dict in bash : sort dict -o dict
 # Remove empty lines on file : sed -i '/^$/d' file.txt
 # Supprimer doublons : sort file | uniq -d > file
 # Enrichir les mots (FR) : https://www.dcode.fr/recherche-mot
+
+# - HEADLESS - (no browser)
+headless = False
 
 # -- DEBUG --
 debug_time = False
@@ -20,8 +24,14 @@ url = "https://sutom.nocle.fr/"
 chromedriver_path = 'driver/chromedriver.exe'
 geckodriver_path = 'driver/geckodriver.exe'
 # -- CORE --
-#driver = webdriver.Chrome(executable_path=chromedriver_path)
-driver = webdriver.Firefox(executable_path=geckodriver_path)
+if headless:
+    chrome_options = Options()
+    chrome_options.add_argument("--disable-extensions")
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--headless")
+    driver = webdriver.Chrome(executable_path=chromedriver_path, options=chrome_options)
+else:
+    driver = webdriver.Firefox(executable_path=geckodriver_path)
 action = ActionChains(driver)
 driver.get(url)
 #driver.maximize_window()
