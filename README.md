@@ -39,6 +39,32 @@ Pour activer le driver Chrome, il convient de commenter la ligne Firefox et de d
 python3 resolver.py
 ```
 
+# Configuration générale
+
+```py
+############# VARIABLE TO MODIFY ###############
+
+headless = True # True pour activer le mode headless, False sinon
+discord = True # True pour activer la sortie sur webhook discord (spécifier l'url), False sinon
+windows = False # True si vous exécutez le script en environnement Windows (sert aux path des drivers), False sinon
+webhook = "add your webhook url here" # L'url de votre webhook discord
+
+############################
+```
+## Discord
+
+Le mode discord vous permet d'avoir le résultat de l'exécution du script, directement dans un channel discord via les *webhook*. [De l'aide est disponile pour la configuration d'un webhook ici](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks). 
+
+![Screenshot_1](https://user-images.githubusercontent.com/46728024/157642082-a55506f6-3790-428e-8e1e-977fbab74396.png)
+
+## Mode Headless
+
+Le mode headless n'affiche pas le nabigateur, mais uniquement la sortie standard. On peut alors s'éviter l'affichage inutile. On peut ainsi lancer le script sur un serveur sans GUI autre qu'un terminal. 
+
+## Automatisation
+
+Pour automatiser l'exécution du script, il faut activer le mode *headless*, et je vous recommande d'activer le mode Discord également, de sorte que vous aurez les sorties du script sur votre channel discord configuré. Une simple tâche planifiée ou *cron* fera l'affaire.
+
 ## Le JEU
 
 ### Règles
