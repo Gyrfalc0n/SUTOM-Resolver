@@ -17,6 +17,7 @@ from selenium.webdriver.chrome.options import Options
 
 headless = True # - HEADLESS - (no browser)
 discord = True
+windows = False
 webhook = "add your webhook url here"
 
 ############################
@@ -34,15 +35,19 @@ word_to_check = ""
 
 # -- VARIABLES --
 url = "https://sutom.nocle.fr/"
-chromedriver_path = 'driver/chromedriver.exe'
-geckodriver_path = 'driver/geckodriver.exe'
+if windows:
+    chromedriver_path = 'driver/chromedriver.exe'
+    geckodriver_path = 'driver/geckodriver.exe'
 # -- CORE --
 if headless:
     chrome_options = Options()
     chrome_options.add_argument("--disable-extensions")
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--headless")
-    driver = webdriver.Chrome(executable_path=chromedriver_path, options=chrome_options)
+    if windows:
+        driver = webdriver.Chrome(executable_path=chromedriver_path, options=chrome_options)
+    else:
+        driver = webdriver.Chrome(options=chrome_options)
 else:
     driver = webdriver.Firefox(executable_path=geckodriver_path)
 action = ActionChains(driver)
