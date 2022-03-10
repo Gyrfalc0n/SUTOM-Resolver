@@ -2,6 +2,7 @@ import time
 from selenium import webdriver
 from collections import Counter
 from selenium.webdriver import ActionChains
+from discord_webhook import DiscordWebhook, DiscordEmbed
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
@@ -14,6 +15,14 @@ from selenium.webdriver.chrome.options import Options
 
 # - HEADLESS - (no browser)
 headless = False
+discord = True
+webhook = ""
+global discord_log
+discord_log = ""
+
+def log_string(message):
+    global discord_log
+    discord_log += "\n" + message
 
 # -- DEBUG --
 debug_time = False
@@ -57,7 +66,10 @@ unr = open(unrecognised_words_txt, 'a+')
 # Table dimension counting
 row_count = len(driver.find_elements(By.XPATH, "//*[@id=\"grille\"]/table/tr"))
 colums_count = int(len(driver.find_elements(By.XPATH, "//*[@id=\"grille\"]/table/tr/td"))/row_count)
-print(" -- Grille du jour -- \n" + "Lignes: " + str(row_count) + ", Colonnes: " + str(colums_count))
+if not discord:
+    print(" -- Grille du jour -- \n" + "Lignes: " + str(row_count) + ", Colonnes: " + str(colums_count))
+else:
+    log_string(" -- Grille du jour -- \n" + "Lignes: " + str(row_count) + ", Colonnes: " + str(colums_count))
 # Table duplication
 global grille, tag, actual_row, possible, unrecognised_words, exclude_letters
 exclude_letters = []
@@ -240,14 +252,20 @@ def check_if_word_exist(word): # Check if last sent word is in grille, if not, t
             index = k-1 # Index of row to send next word
             break
     if index == 0 and actual_row == 0: # First sent word
-        print(word + " is unknown to the game")
+        if not discord:
+            print(word + " is unknown to the game")
+        else:
+            log_string(word + " is unknown to the game")
         actual_row -= 1 # Not count last sent word, as it is not recognised
         unrecognised_words.append(word)
         timer("check_if_word_exist()")
         driver.refresh()
         return False
     elif actual_row >= index:
-        print(word + " is unknown to the game")
+        if not discord:
+            print(word + " is unknown to the game")
+        else:
+            log_string(word + " is unknown to the game")
         actual_row -= 1 # Not count last sent word, as it is not recognised
         unrecognised_words.append(word)
         possible.remove(word)
@@ -265,12 +283,30 @@ def timer(string):
         print("\t" + string + " time = " + str(round(local - timerr,2)))
         timerr = local
 
+# Discord
+def discord_wb(word, tryy, time):
+    webhook = DiscordWebhook(url=webhook)
+    embed2 = DiscordEmbed(title="Mot du jour", color='AC33FF')
+    embed2.add_embed_field(name='Mot à trouver', value=word, inline=False)
+    embed2.add_embed_field(name='Essais', value=tryy)
+    embed2.add_embed_field(name='Temps', value=time)
+    embed = DiscordEmbed(title="Log d'execution", description=discord_log, color='f6ff00')
+    embed.set_image(url='images/screenshot.png')
+    embed.set_author(name="SUTOM Resolver", url="https://github.com/Gyrfalc0n/SUTOM-Resolver", icon_url='https://cdn-icons-png.flaticon.com/512/25/25231.png')
+    embed.set_timestamp()
+    webhook.add_embed(embed2)
+    webhook.add_embed(embed)
+    webhook.execute()
+
 # -- MAIN --
 count = 0
 while True:
     refresh_table()
     first_word = random_word()
-    print("Guess(1): " + str(first_word))
+    if not discord:
+        print("Guess(1): " + str(first_word))
+    else:
+        log_string("Guess(1): " + str(first_word))
     send_word(first_word)
     refresh_table()
     if check_if_word_exist(first_word):
@@ -278,10 +314,16 @@ while True:
 while True:
     refresh_table()
     possible_words()
-    print(" - " + str(len(possible)) + " possible words")
+    if not discord:
+        print(" - " + str(len(possible)) + " possible words")
+    else:
+        log_string(" - " + str(len(possible)) + " possible words")
     word = guess_word()
     if word != None:
-        print("Guess(" + str(count+2) + "): " + str(word))
+        if not discord:
+            print("Guess(" + str(count+2) + "): " + str(word))
+        else:
+            log_string("Guess(" + str(count+2) + "): " + str(word))
         send_word(word)
         if not isWin():
             refresh_table()
@@ -289,24 +331,41 @@ while True:
                 if len(possible) >= 1:
                     count += 1
     else:
-        print("ERROR : NO MORE WORD IN DICT TO GUESS")
+        if not discord:
+            print("ERROR : NO MORE WORD IN DICT TO GUESS")
+        else:
+            log_string("ERROR : NO MORE WORD IN DICT TO GUESS")
         time.sleep(1)
         update_unreco()
         driver.save_screenshot("screenshot.png")
-        input("Press Enter to quit...")
+        end_time = time.time()
+        execution_time = round(end_time - start_time, 1)
+        if not discord:
+            input("Press Enter to quit...")
+        else:
+            discord_wb("Not found", str(count+2), str(execution_time)+ " seconds")
         time.sleep(1)
         driver.close()
         break
     if isWin() or count >= row_count:
         if count >= row_count:
-            print("WARNING : WORD NOT FOUND IN GIVEN TRY COUNT")
+            if not discord:
+                print("WARNING : WORD NOT FOUND IN GIVEN TRY COUNT")
+            else:
+                log_string("WARNING : WORD NOT FOUND IN GIVEN TRY COUNT")
         else: # WIN
             end_time = time.time()
             execution_time = round(end_time - start_time, 1)
-            print("\n -[ Word was " + word + " found in " + str(count+2) + " try and " + str(execution_time) + " seconds! ]- \n")
+            if not discord:
+                print("\n -[ Word was " + word + " found in " + str(count+2) + " try and " + str(execution_time) + " seconds! ]- \n")
+            else:
+                log_string("\n -[ Word was " + word + " found in " + str(count+2) + " try and " + str(execution_time) + " seconds! ]- \n")
         update_unreco()
         driver.save_screenshot("images/screenshot.png")
-        input("Press Enter to quit...")
+        if not discord:
+            input("Press Enter to quit...")
+        else:
+            discord_wb(word, str(count+2), str(execution_time)+ " seconds")
         time.sleep(1)
         driver.close()
         break;
