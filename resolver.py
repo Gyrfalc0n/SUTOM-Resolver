@@ -47,7 +47,7 @@ if headless:
     if windows:
         driver = webdriver.Chrome(executable_path=chromedriver_path, options=chrome_options)
     else:
-        driver = webdriver.Chrome(options=chrome_options)
+        driver = webdriver.Chrome(executable_path='/usr/bin/chromedriver', options=chrome_options)
 else:
     driver = webdriver.Firefox(executable_path=geckodriver_path)
 action = ActionChains(driver)
