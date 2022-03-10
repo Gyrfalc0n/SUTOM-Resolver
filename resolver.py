@@ -15,10 +15,10 @@ from selenium.webdriver.chrome.options import Options
 
 ############# VARIABLE TO MODIFY ###############
 
-headless = True # - HEADLESS - (no browser)
-discord = False
+headless = False # - HEADLESS - (no browser)
+discord = True
 windows = True
-webhook = "add your webhook url here"
+webhook = ""
 
 ############################
 
@@ -299,29 +299,31 @@ def stats(tryy, time):
             if not line.startswith('#'):
                 sline = line.split()
                 count = int(sline[0]) + 1
-                essais = round((float(sline[1]) + tryy )/ count,2)
-                temps = round((float(sline[2]) + time )/ count,2)
+                essais = float(sline[1]) + tryy
+                temps = float(sline[2]) + time
     if os.path.exists('stats.txt'):
         os.remove('stats.txt')
     with open('stats_temp.txt', 'w') as temp:
         temp.writelines("# COUNT ESSAIS_MOYENS TEMPS_MOYEN\n")
         temp.writelines(str(count) + " " + str(essais) + " " + str(temps))
-        print("write stats temp")
     os.rename('stats_temp.txt', 'stats.txt')
-    return count, essais, temps
+    return count, round(essais/count,2), round(temps/count, 2)
 
 # Discord
 def discord_wb(word, tryy, time, webhook_url, count, essais, temps):
     webhook = DiscordWebhook(url=webhook_url)
     embed2 = DiscordEmbed(title="Mot du jour", color='AC33FF')
-    embed2.add_embed_field(name='Mot à trouver', value=word, inline=False)
-    embed2.add_embed_field(name='Essais', value=tryy)
+    embed2.add_embed_field(name='Mot trouvé', value=word)
+    embed2.add_embed_field(name='Nombre d\'essais', value=tryy)
     embed2.add_embed_field(name='Temps', value=time)
     embed2.add_embed_field(name='\u200b', value='\u200b', inline=False)
-    embed2.add_embed_field(name='Executions', value=count)
-    embed2.add_embed_field(name='Moyenne essais', value=count + " essais")
-    embed2.add_embed_field(name='Moyenne temps', value=count + " secondes")
-    embed2.set_author(name="SUTOM Resolver", url="https://github.com/Gyrfalc0n/SUTOM-Resolver", icon_url='https://cdn-icons-png.flaticon.com/512/25/25231.png')
+    embed2.add_embed_field(name='Total', value=str(count))
+    embed2.add_embed_field(name='Essais moyen', value=str(essais) + " essais")
+    embed2.add_embed_field(name='Temps moyen', value=str(temps) + " secondes")
+    embed2.set_author(name="SUTOM Resolver", url="https://github.com/Gyrfalc0n/SUTOM-Resolver", icon_url='https://avatars.githubusercontent.com/u/46728024?v=4')
+    with open("images/sutom.png", "rb") as f:
+        webhook.add_file(file=f.read(), filename='sutom.png')
+    embed2.set_thumbnail(url='attachment://sutom.png')
     webhook.add_embed(embed2)
     embed = DiscordEmbed(title="Logs d'execution", description=discord_log, color='f6ff00')
     embed.set_timestamp()
