@@ -13,10 +13,14 @@ from selenium.webdriver.chrome.options import Options
 # Supprimer doublons : sort file | uniq -d > file
 # Enrichir les mots (FR) : https://www.dcode.fr/recherche-mot
 
-# - HEADLESS - (no browser)
-headless = False
+############# VARIABLE TO MODIFY ###############
+
+headless = True # - HEADLESS - (no browser)
 discord = True
-webhook = ""
+webhook = "add your webhook url here"
+
+############################
+
 global discord_log
 discord_log = ""
 
@@ -284,18 +288,20 @@ def timer(string):
         timerr = local
 
 # Discord
-def discord_wb(word, tryy, time):
-    webhook = DiscordWebhook(url=webhook)
+def discord_wb(word, tryy, time, webhook_url):
+    webhook = DiscordWebhook(url=webhook_url)
     embed2 = DiscordEmbed(title="Mot du jour", color='AC33FF')
     embed2.add_embed_field(name='Mot à trouver', value=word, inline=False)
     embed2.add_embed_field(name='Essais', value=tryy)
     embed2.add_embed_field(name='Temps', value=time)
-    embed = DiscordEmbed(title="Log d'execution", description=discord_log, color='f6ff00')
-    embed.set_image(url='images/screenshot.png')
-    embed.set_author(name="SUTOM Resolver", url="https://github.com/Gyrfalc0n/SUTOM-Resolver", icon_url='https://cdn-icons-png.flaticon.com/512/25/25231.png')
-    embed.set_timestamp()
+    embed2.set_author(name="SUTOM Resolver", url="https://github.com/Gyrfalc0n/SUTOM-Resolver", icon_url='https://cdn-icons-png.flaticon.com/512/25/25231.png')
     webhook.add_embed(embed2)
+    embed = DiscordEmbed(title="Logs d'execution", description=discord_log, color='f6ff00')
+    embed.set_timestamp()
     webhook.add_embed(embed)
+    with open("images/screenshot.png", "rb") as f:
+        webhook.add_file(file=f.read(), filename='image.png')
+    embed.set_thumbnail(url='attachment://image.png')
     webhook.execute()
 
 # -- MAIN --
@@ -343,7 +349,7 @@ while True:
         if not discord:
             input("Press Enter to quit...")
         else:
-            discord_wb("Not found", str(count+2), str(execution_time)+ " seconds")
+            discord_wb("Not found", str(count+2), str(execution_time)+ " secondes", webhook)
         time.sleep(1)
         driver.close()
         break
@@ -365,7 +371,7 @@ while True:
         if not discord:
             input("Press Enter to quit...")
         else:
-            discord_wb(word, str(count+2), str(execution_time)+ " seconds")
+            discord_wb(word, str(count+2), str(execution_time)+ " secondes", webhook)
         time.sleep(1)
         driver.close()
         break;
