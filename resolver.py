@@ -1,4 +1,4 @@
-import time
+import time, os
 from selenium import webdriver
 from collections import Counter
 from selenium.webdriver import ActionChains
@@ -16,8 +16,8 @@ from selenium.webdriver.chrome.options import Options
 ############# VARIABLE TO MODIFY ###############
 
 headless = True # - HEADLESS - (no browser)
-discord = True
-windows = False
+discord = False
+windows = True
 webhook = "add your webhook url here"
 
 ############################
@@ -292,13 +292,35 @@ def timer(string):
         print("\t" + string + " time = " + str(round(local - timerr,2)))
         timerr = local
 
+# Stats
+def stats(tryy, time):
+    with open('stats.txt', 'r') as stats:
+        for line in stats:
+            if not line.startswith('#'):
+                sline = line.split()
+                count = int(sline[0]) + 1
+                essais = round((float(sline[1]) + tryy )/ count,2)
+                temps = round((float(sline[2]) + time )/ count,2)
+    if os.path.exists('stats.txt'):
+        os.remove('stats.txt')
+    with open('stats_temp.txt', 'w') as temp:
+        temp.writelines("# COUNT ESSAIS_MOYENS TEMPS_MOYEN\n")
+        temp.writelines(str(count) + " " + str(essais) + " " + str(temps))
+        print("write stats temp")
+    os.rename('stats_temp.txt', 'stats.txt')
+    return count, essais, temps
+
 # Discord
-def discord_wb(word, tryy, time, webhook_url):
+def discord_wb(word, tryy, time, webhook_url, count, essais, temps):
     webhook = DiscordWebhook(url=webhook_url)
     embed2 = DiscordEmbed(title="Mot du jour", color='AC33FF')
     embed2.add_embed_field(name='Mot à trouver', value=word, inline=False)
     embed2.add_embed_field(name='Essais', value=tryy)
     embed2.add_embed_field(name='Temps', value=time)
+    embed2.add_embed_field(name='\u200b', value='\u200b', inline=False)
+    embed2.add_embed_field(name='Executions', value=count)
+    embed2.add_embed_field(name='Moyenne essais', value=count + " essais")
+    embed2.add_embed_field(name='Moyenne temps', value=count + " secondes")
     embed2.set_author(name="SUTOM Resolver", url="https://github.com/Gyrfalc0n/SUTOM-Resolver", icon_url='https://cdn-icons-png.flaticon.com/512/25/25231.png')
     webhook.add_embed(embed2)
     embed = DiscordEmbed(title="Logs d'execution", description=discord_log, color='f6ff00')
@@ -351,10 +373,11 @@ while True:
         driver.save_screenshot("screenshot.png")
         end_time = time.time()
         execution_time = round(end_time - start_time, 1)
+        statistiques = stats(count+2, execution_time)
         if not discord:
             input("Press Enter to quit...")
         else:
-            discord_wb("Not found", str(count+2), str(execution_time)+ " secondes", webhook)
+            discord_wb("Not found", str(count+2), str(execution_time)+ " secondes", webhook, statistiques[0], statistiques[1], statistiques[2])
         time.sleep(1)
         driver.close()
         break
@@ -373,10 +396,11 @@ while True:
                 log_string("\n -[ Word was " + word + " found in " + str(count+2) + " try and " + str(execution_time) + " seconds! ]- \n")
         update_unreco()
         driver.save_screenshot("images/screenshot.png")
+        statistiques = stats(count+2, execution_time)
         if not discord:
             input("Press Enter to quit...")
         else:
-            discord_wb(word, str(count+2), str(execution_time)+ " secondes", webhook)
+            discord_wb(word, str(count+2), str(execution_time)+ " secondes", webhook, statistiques[0], statistiques[1], statistiques[2])
         time.sleep(1)
         driver.close()
         break;
