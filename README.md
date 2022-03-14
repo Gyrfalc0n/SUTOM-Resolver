@@ -55,7 +55,7 @@ webhook = "add your webhook url here" # L'url de votre webhook discord
 
 Le mode discord vous permet d'avoir le résultat de l'exécution du script, directement dans un channel discord via les *webhook*. [De l'aide est disponile pour la configuration d'un webhook ici](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks). 
 
-![Screenshot_1](https://user-images.githubusercontent.com/46728024/157642082-a55506f6-3790-428e-8e1e-977fbab74396.png)
+![Screenshot_1](https://user-images.githubusercontent.com/46728024/158126970-af41645b-a9b6-40c8-b807-7242cf850aee.png)
 
 ## Mode Headless
 
